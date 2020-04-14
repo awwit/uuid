@@ -35,6 +35,14 @@ done
 echo "Removing browser-specific files from esm-node"
 rm -f "$DIR"/esm-node/*-browser.js
 
+for FILE in "$DIR"/esm-node/*.js
+do
+    echo "Renaming esm-node file to .mjs: $FILE"
+    mv "$FILE" "${FILE%.js}.mjs"
+done
+# Fix imports
+sed -i'' -e "s/\.js'/.mjs'/" "$DIR"/esm-node/*.mjs
+
 # UMD Build
 mkdir "$DIR/umd"
 rollup -c
