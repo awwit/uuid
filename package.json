@@ -39,8 +39,7 @@
     "v1.js",
     "v3.js",
     "v4.js",
-    "v5.js",
-    "wrapper.mjs"
+    "v5.js"
   ],
   "devDependencies": {
     "@babel/cli": "7.8.4",
