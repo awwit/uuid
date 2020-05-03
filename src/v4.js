@@ -22,9 +22,11 @@ function v4(options, buf, offset) {
     for (let i = 0; i < 16; ++i) {
       buf[start + i] = rnds[i];
     }
+
+    return buf;
   }
 
-  return buf || bytesToUuid(rnds);
+  return bytesToUuid(rnds);
 }
 
 export default v4;
