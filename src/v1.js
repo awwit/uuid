@@ -16,7 +16,7 @@ let _lastNSecs = 0;
 // See https://github.com/uuidjs/uuid for API details
 function v1(options, buf, offset) {
   let i = (buf && offset) || 0;
-  const b = buf || [];
+  const b = buf || new Array(16);
 
   options = options || {};
   let node = options.node || _nodeId;
@@ -27,6 +27,7 @@ function v1(options, buf, offset) {
   // system entropy.  See #189
   if (node == null || clockseq == null) {
     const seedBytes = options.random || (options.rng || rng)();
+
     if (node == null) {
       // Per 4.5, create and 48-bit node id, (47 random bits + multicast bit = 1)
       node = _nodeId = [
@@ -38,6 +39,7 @@ function v1(options, buf, offset) {
         seedBytes[5],
       ];
     }
+
     if (clockseq == null) {
       // Per 4.2.2, randomize (14 bit) clockseq
       clockseq = _clockseq = ((seedBytes[6] << 8) | seedBytes[7]) & 0x3fff;
@@ -82,25 +84,27 @@ function v1(options, buf, offset) {
 
   // `time_low`
   const tl = ((msecs & 0xfffffff) * 10000 + nsecs) % 0x100000000;
-  b[i++] = (tl >>> 24) & 0xff;
-  b[i++] = (tl >>> 16) & 0xff;
-  b[i++] = (tl >>> 8) & 0xff;
-  b[i++] = tl & 0xff;
+  b[i + 0] = (tl >>> 24) & 0xff;
+  b[i + 1] = (tl >>> 16) & 0xff;
+  b[i + 2] = (tl >>> 8) & 0xff;
+  b[i + 3] = tl & 0xff;
 
   // `time_mid`
   const tmh = ((msecs / 0x100000000) * 10000) & 0xfffffff;
-  b[i++] = (tmh >>> 8) & 0xff;
-  b[i++] = tmh & 0xff;
+  b[i + 4] = (tmh >>> 8) & 0xff;
+  b[i + 5] = tmh & 0xff;
 
   // `time_high_and_version`
-  b[i++] = ((tmh >>> 24) & 0xf) | 0x10; // include version
-  b[i++] = (tmh >>> 16) & 0xff;
+  b[i + 6] = ((tmh >>> 24) & 0xf) | 0x10; // include version
+  b[i + 7] = (tmh >>> 16) & 0xff;
 
   // `clock_seq_hi_and_reserved` (Per 4.2.2 - include variant)
-  b[i++] = (clockseq >>> 8) | 0x80;
+  b[i + 8] = (clockseq >>> 8) | 0x80;
 
   // `clock_seq_low`
-  b[i++] = clockseq & 0xff;
+  b[i + 9] = clockseq & 0xff;
+
+  i += 10;
 
   // `node`
   for (let n = 0; n < 6; ++n) {
